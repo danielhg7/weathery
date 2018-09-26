@@ -1,0 +1,10 @@
+.container{
+    margin-top: 78px;
+    color: white;
+    padding: 38px;
+    border-radius: 10px;
+}
+
+.results{
+    background-color: royalblue;
+}
