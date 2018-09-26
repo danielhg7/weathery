@@ -1,43 +1,47 @@
-<div class="container" *ngIf='!weather'>
-      <div class="form-group">
-        <label for="exampleInputEmail1">Input a city</label>
-        <input class="form-control" id="city" [(ngModel)]='city' aria-describedby="emailHelp" placeholder="e.g: London">
-      </div>
-      <button type="submit" class="btn btn-primary" (click)="getCityWeather()">Submit</button>
-</div>
-<div class="container results" *ngIf='weather'>
-    
-    <h1>{{ city }}</h1>
-
-    <div>
-        <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">Temperature</th>
-                <th scope="col">Pressure</th>
-                <th scope="col">Humidity</th>
-                <th scope="col">Visibility</th>
-                <th scope="col">Wind Speed</th>
-                <th scope="col">Cloud percentage</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{{ weather.main.temp | number:'1.0-0' }}</td>
-                <td>{{ weather.main.pressure + ' hPa' }}</td>
-                <td>{{ weather.main.humidity + '%' }}</td>
-                <td>{{ weather.visibility }}</td>
-                <td>{{ weather.wind.speed + ' m/s' }}</td>
-                <td>{{ weather.clouds.all + '%' }}</td>
-              </tr>
-            </tbody>
-          </table>
+<div class='bgContainer' 
+    [ngStyle]="{'background-image':'url(' + backgroundImage + ')'}">
+  <div class='container' *ngIf='!weather'>
+    <div class='form-group'>
+      <label>Input a city</label>
+      <input class="form-control" id="city" [(ngModel)]='city' aria-describedby="emailHelp" placeholder="e.g: London">
     </div>
+    <button type="submit" class="btn btn-primary" (click)="getCityWeather()">Submit</button>
+  </div>
+  <div class="container results" *ngIf='weather'>
+      
+      <h1>{{ city }}</h1>
+  
+      <div>
+          <table class="table">
+              <thead>
+                <tr>
+                  <th scope='col'>Temperature</th>
+                  <th scope='col'>Pressure</th>
+                  <th *ngIf='weather.main.humidity' scope='col'>Humidity</th>
+                  <th *ngIf='weather.visibility' scope='col'>Visibility</th>
+                  <th scope='col'>Wind Speed</th>
+                  <th scope='col'>Cloud percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td *ngIf='weather.main.temp'>{{ weather.main.temp | number:'1.0-0' }}<span>°</span></td>
+                  <td *ngIf='weather.main.pressure'>{{ weather.main.pressure + ' hPa' }}</td>
+                  <td *ngIf='weather.main.humidity'>{{ weather.main.humidity + '%' }}</td>
+                  <td *ngIf='weather.visibility'>{{ weather.visibility + ' m'}}</td>
+                  <td *ngIf='weather.wind.speed'>{{ weather.wind.speed + ' m/s' }}</td>
+                  <td *ngIf='weather.clouds.all || weather.clouds.all == 0'>{{ weather.clouds.all + '%' }}</td>
+                </tr>
+              </tbody>
+            </table>
+      </div>
+  </div>
+  
+  <div class='container' *ngIf='weather'>
+      <button class="btn btn-secondary" (click)="goBack()"><i class='fa fa-chevron-left'></i> Back</button>
+  </div>
 </div>
 
-<div class='container' *ngIf='weather'>
-    <button class="btn btn-secondary" (click)="goBack()"><i class='fa fa-chevron-left'></i> Back</button>
-</div>
 
 
 
