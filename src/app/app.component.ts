@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { WeatherService } from '../weather/weather.service';
 import { ICityWeather } from '../weather/cityWeather';
-import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'wt-root',
@@ -15,21 +16,20 @@ export class AppComponent {
   weather: ICityWeather;
   backgroundImage: string = 'src/assets/images/landscape.jpg';
 
-  constructor(private weatherService: WeatherService){
+  constructor(private weatherService: WeatherService,
+              private toastrService: ToastrService,
+              private titleCasePipe: TitleCasePipe){
 
   }
 
   getCityWeather(): void{
+
     this.weatherService.getgetCityWeatherByName(this.city).subscribe(
       weather => {
           this.weather = weather;
           this.weather.main.temp = this.weather.main.temp - 273.15;
 
-          if(this.weather.weather[0].main == 'Clear'){
-            this.backgroundImage = 'src/assets/images/clear.jpg';
-          }
-
-          else if(this.weather.weather[0].main == 'Fog'){
+          if(this.weather.weather[0].main == 'Fog'){
             this.backgroundImage = 'src/assets/images/fog.jpg';
           }
 
@@ -41,6 +41,14 @@ export class AppComponent {
             this.backgroundImage = 'src/assets/images/scatteredClouds.jpg';
           }
 
+          else if(this.weather.weather[0].description == 'broken clouds'){
+            this.backgroundImage = 'src/assets/images/brokenClouds.jpg';
+          }
+          
+          else if(this.weather.weather[0].description == 'light rain'){
+            this.backgroundImage = 'src/assets/images/lightRain.jpg';
+          }
+
           else if(this.weather.weather[0].description == 'shower rain'){
             this.backgroundImage = 'src/assets/images/showerRain.jpg';
           }
@@ -49,8 +57,13 @@ export class AppComponent {
             this.backgroundImage = 'src/assets/images/clearSky.jpg';
           }
 
+          this.toastrService.success("Great");
+
       },
-      error => this.errorMessage = <any>error
+      error => {
+        this.errorMessage = <any>error;
+        this.toastrService.error(this.titleCasePipe.transform(this.errorMessage));
+      }
     );
   }
 

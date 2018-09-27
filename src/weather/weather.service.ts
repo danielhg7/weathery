@@ -19,7 +19,6 @@ export class WeatherService {
         headers.append('Content-Type', 'application/json');
 
         let params = new HttpParams().set('q', city).set('appid', '25e473e910feaf92d205315541ffe0d8');
-        console.log(params.keys[0]);
 
         return this.http.get<ICityWeather>(this.weatherUrl, { headers: headers, params: params }).pipe(
             tap(data => console.log('All: ' + JSON.stringify(data))),
@@ -40,7 +39,7 @@ export class WeatherService {
         else {
             // The backend returned an unsuccessful response code.
             // The response body may contain clues as to what went wrong,
-            errorMessage = `Server returned code: ${err.status}, error message is: ${err.message}`;
+            errorMessage = `${err.error.message}`;
         }
 
         console.error(errorMessage);

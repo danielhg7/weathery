@@ -16,6 +16,7 @@
               <thead>
                 <tr>
                   <th scope='col'>Temperature</th>
+                  <th scope='col'>Weather Description</th>
                   <th scope='col'>Pressure</th>
                   <th *ngIf='weather.main.humidity' scope='col'>Humidity</th>
                   <th *ngIf='weather.visibility' scope='col'>Visibility</th>
@@ -25,7 +26,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td *ngIf='weather.main.temp'>{{ weather.main.temp | number:'1.0-0' }}<span>°</span></td>
+                  <td *ngIf='weather.main.temp'>{{ weather.main.temp | number:'1.0-0' }}<span>°C</span></td>
+                  <td *ngIf='weather.weather[0].description'>{{ weather.weather[0].description | titlecase }}</td>
                   <td *ngIf='weather.main.pressure'>{{ weather.main.pressure + ' hPa' }}</td>
                   <td *ngIf='weather.main.humidity'>{{ weather.main.humidity + '%' }}</td>
                   <td *ngIf='weather.visibility'>{{ weather.visibility + ' m'}}</td>

@@ -3,6 +3,7 @@
 @import "~bootstrap/dist/css/bootstrap.min.css";
 @import "~font-awesome/css/font-awesome.min.css";
 @import "~weather-icons/css/weather-icons.min.css";
+@import "~ngx-toastr/toastr.css";
 
 html, body{
     height: 100%;
