@@ -53,6 +53,10 @@ export class AppComponent {
             this.backgroundImage = 'src/assets/images/showerRain.jpg';
           }
 
+          else if(this.weather.weather[0].description == 'heavy intensity rain'){
+            this.backgroundImage = 'src/assets/images/heavyIntensityRain.jpg';
+          }
+
           else if(this.weather.weather[0].description == 'clear sky'){
             this.backgroundImage = 'src/assets/images/clearSky.jpg';
           }
