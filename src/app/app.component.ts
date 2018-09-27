@@ -17,8 +17,8 @@ export class AppComponent {
   backgroundImage: string = 'src/assets/images/landscape.jpg';
 
   constructor(private weatherService: WeatherService,
-              private toastrService: ToastrService,
-              private titleCasePipe: TitleCasePipe){
+              private toastrService: ToastrService
+              /*private titleCasePipe: TitleCasePipe*/){
 
   }
 
@@ -57,12 +57,10 @@ export class AppComponent {
             this.backgroundImage = 'src/assets/images/clearSky.jpg';
           }
 
-          this.toastrService.success("Great");
-
       },
       error => {
         this.errorMessage = <any>error;
-        this.toastrService.error(this.titleCasePipe.transform(this.errorMessage));
+        this.toastrService.error(/*this.titleCasePipe.transform(*/this.errorMessage/*)*/);
       }
     );
   }
