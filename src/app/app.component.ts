@@ -1,76 +1,41 @@
 import { Component } from '@angular/core';
-import { WeatherService } from '../weather/weather.service';
-import { ICityWeather } from '../weather/cityWeather';
+import { Router } from '@angular/router';
+import { CityService } from './city/city.service';
 import { ToastrService } from 'ngx-toastr';
-import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'wt-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  pageTitle: string  = 'weathery';
-  city: string;
+export class AppComponent{
+  pageTitle: string  = 'Weathery';
+  city: string = '';
+  cities: any[];
   errorMessage: string;
-  weather: ICityWeather;
-  backgroundImage: string = 'src/assets/images/landscape.jpg';
+  imageWidth: number = 35;
+  imageMargin: number = 2;
 
-  constructor(private weatherService: WeatherService,
-              private toastrService: ToastrService
-              /*private titleCasePipe: TitleCasePipe*/){
+  constructor(private router: Router, 
+              private cityService: CityService, 
+              private toastrService: ToastrService){
 
   }
 
-  getCityWeather(): void{
-
-    this.weatherService.getgetCityWeatherByName(this.city).subscribe(
-      weather => {
-          this.weather = weather;
-          this.weather.main.temp = this.weather.main.temp - 273.15;
-
-          if(this.weather.weather[0].main == 'Fog'){
-            this.backgroundImage = 'src/assets/images/fog.jpg';
-          }
-
-          else if(this.weather.weather[0].description == 'few clouds'){
-            this.backgroundImage = 'src/assets/images/fewClouds.jpg';
-          }
-
-          else if(this.weather.weather[0].description == 'scattered clouds'){
-            this.backgroundImage = 'src/assets/images/scatteredClouds.jpg';
-          }
-
-          else if(this.weather.weather[0].description == 'broken clouds'){
-            this.backgroundImage = 'src/assets/images/brokenClouds.jpg';
-          }
-          
-          else if(this.weather.weather[0].description == 'light rain'){
-            this.backgroundImage = 'src/assets/images/lightRain.jpg';
-          }
-
-          else if(this.weather.weather[0].description == 'shower rain'){
-            this.backgroundImage = 'src/assets/images/showerRain.jpg';
-          }
-
-          else if(this.weather.weather[0].description == 'heavy intensity rain'){
-            this.backgroundImage = 'src/assets/images/heavyIntensityRain.jpg';
-          }
-
-          else if(this.weather.weather[0].description == 'clear sky'){
-            this.backgroundImage = 'src/assets/images/clearSky.jpg';
-          }
-
-      },
-      error => {
-        this.errorMessage = <any>error;
-        this.toastrService.error(/*this.titleCasePipe.transform(*/this.errorMessage/*)*/);
-      }
-    );
-  }
-
-  goBack(): void{
-    this.weather = undefined;
+  onSubmit(): void{
+    this.router.navigate(['/weather'], { queryParams: { city: this.city }});
     this.city = '';
   }
+
+  getCities(): void{
+    this.cityService.getCities(this.city).subscribe(
+        cities => {
+        this.cities = cities.predictions;
+        },
+        error => {
+        this.errorMessage = <any>error;
+        this.toastrService.error(/*this.titleCasePipe.transform(*/this.errorMessage/*)*/);
+        }
+    )
+}
 }

@@ -1,20 +1,30 @@
-.container{
-    padding-top: 70px;
+.nav-link {
+    font-size: large;
+}
+
+.nav-back {
+    background-color: #023F5F !important;
     color: white;
-    border-radius: 10px;
 }
 
-.results{
-    margin-top: 59px;
-    margin-left: 8%;
-    background-color: royalblue;
-    position: absolute;
-    align-content: center;
+.vh8{
+    height: 8vh;
 }
 
-.bgContainer{
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 100%;
+.vh92{
+    height: 92vh;
+}
+
+.inputCity{
+    width: 60vh;
+    border-radius: 18px;
+}
+
+.pageBarLogo{
+    margin-left: 4rem;
+}
+
+.pageBarTitle{
+    margin-left: 0.3rem;
+    margin-right: 1.5rem;
 }

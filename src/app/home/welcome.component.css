@@ -1,0 +1,20 @@
+.bgContainer{
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+}
+
+.wt-container{
+    text-align: center;
+    color:white;
+    padding: 6%;
+}
+
+.wt-container h1{
+    font-size: 3.5rem;
+}
+
+.wt-container h2{
+    font-size: 2rem;
+}

@@ -1,0 +1,26 @@
+.container{
+    padding-top: 70px;
+    color: white;
+    border-radius: 10px;
+}
+
+.results{
+    margin-top: 59px;
+    margin-left: 8%;
+    align-content: center;
+}
+
+.bgContainer{
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 100%;
+}
+
+.rem3{
+    font-size:3rem;
+}
+
+.bold{
+    font-weight: bold;
+}

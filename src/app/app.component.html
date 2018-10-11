@@ -1,49 +1,19 @@
-<div class='bgContainer' 
-    [ngStyle]="{'background-image':'url(' + backgroundImage + ')'}">
-  <div class='container' *ngIf='!weather'>
-    <div class='form-group'>
-      <label>Input a city</label>
-      <input class="form-control" id="city" [(ngModel)]='city' aria-describedby="emailHelp" placeholder="e.g: London">
-    </div>
-    <button type="submit" class="btn btn-primary" (click)="getCityWeather()">Submit</button>
-  </div>
-  <div class="container results" *ngIf='weather'>
-      
-      <h1>{{ city }}</h1>
-  
-      <div>
-          <table class="table">
-              <thead>
-                <tr>
-                  <th scope='col'>Temperature</th>
-                  <th scope='col'>Weather Description</th>
-                  <th scope='col'>Pressure</th>
-                  <th *ngIf='weather.main.humidity' scope='col'>Humidity</th>
-                  <th *ngIf='weather.visibility' scope='col'>Visibility</th>
-                  <th scope='col'>Wind Speed</th>
-                  <th scope='col'>Cloud percentage</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td *ngIf='weather.main.temp'>{{ weather.main.temp | number:'1.0-0' }}<span>°C</span></td>
-                  <td *ngIf='weather.weather[0].description'>{{ weather.weather[0].description | titlecase }}</td>
-                  <td *ngIf='weather.main.pressure'>{{ weather.main.pressure + ' hPa' }}</td>
-                  <td *ngIf='weather.main.humidity'>{{ weather.main.humidity + '%' }}</td>
-                  <td *ngIf='weather.visibility'>{{ weather.visibility + ' m'}}</td>
-                  <td *ngIf='weather.wind.speed'>{{ weather.wind.speed + ' m/s' }}</td>
-                  <td *ngIf='weather.clouds.all || weather.clouds.all == 0'>{{ weather.clouds.all + '%' }}</td>
-                </tr>
-              </tbody>
-            </table>
-      </div>
-  </div>
-  
-  <div class='container' *ngIf='weather'>
-      <button class="btn btn-secondary" (click)="goBack()"><i class='fa fa-chevron-left'></i> Back</button>
-  </div>
+<nav class='navbar navbar-expand navbar-light bg-light vh8 nav-back'>
+    <img src='src/assets/icons/weathery.png' class='pageBarLogo' [style.width.px]='imageWidth' />
+    <a class='navbar-brand pageBarTitle'>{{ pageTitle }}</a>
+    <ul class='nav nav-pills'>
+    </ul>
+    <form (ngSubmit)="onSubmit()">
+      <input [(ngModel)]='city' name='city' id='city' class="inputCity form-control form-control-sm" 
+              (keyup)='getCities($event)' placeholder="Where do you want to go?" list="cities"/>
+      <datalist id="cities">
+          <option *ngFor="let citi of cities" value="{{citi.description}}">{{ citi.description }}</option>
+      </datalist>
+    </form>
+</nav>
+<div class='vh92'>
+  <router-outlet></router-outlet>
 </div>
-
 
 
 

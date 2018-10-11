@@ -1,0 +1,67 @@
+<div class='bgContainer' 
+    [ngStyle]="{'background-image':'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(' + backgroundImage + ')'}">
+    <div class='container'>
+        <div *ngIf='currentTimestamp' style='text-align: center'>
+            <div>
+                <h1 class='rem3'>{{ city }}</h1>
+            </div>
+            <div>
+                <h1 class='bold'>
+                    <p>{{ currentWeather.temperature | number:'1.0-0' }}<span>°C</span></p>
+                </h1>
+            </div>
+            <div>
+                <h2>
+                    <div style="text-align: center;">
+                        <p>
+                            {{ currentTimestamp }} - 
+                            <span style="margin-right: 13px;">{{ currentWeather.summary }}</span>
+                            <span>
+                                <i class='wi wi-day-sunny' *ngIf="currentWeather.icon == 'clear-day'"></i>
+                                <i class='wi wi-night-clear' *ngIf="currentWeather.icon == 'clear-night'"></i>
+                                <i class='wi wi-day-cloudy' *ngIf="currentWeather.icon == 'partly-cloudy-day'"></i>
+                                <i class='wi wi-night-alt-cloudy' *ngIf="currentWeather.icon == 'partly-cloudy-night'"></i>
+                                <i class='wi wi-showers' *ngIf="currentWeather.icon == 'rain'"></i>
+                                <i class='wi wi-cloudy' *ngIf="currentWeather.icon == 'cloudy'"></i>
+                                <i class='wi wi-strong-wind' *ngIf="currentWeather.icon == 'wind'"></i>
+                                <i class='wi wi-fog' *ngIf="currentWeather.icon == 'fog'"></i>
+                            </span>
+                        </p>
+                    </div>
+                </h2>
+            </div>
+        </div>
+    </div>
+    <div class="container results" *ngIf='currentWeather'>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th *ngIf='currentWeather.humidity' scope='col'>Humedad</th>
+                        <th *ngIf='currentWeather.windSpeed' scope='col'>Velocidad del viento</th>
+                        <th *ngIf='currentWeather.pressure' scope='col'>Presión</th>
+                        <th *ngIf='currentWeather.cloudCover' scope='col'>Nubosidad</th>
+                        <th *ngIf='currentWeather.precipIntensity' scope='col'>Intensidad de precipitación</th>
+                        <th *ngIf='currentWeather.visibility' scope='col'>Visibilidad</th>
+                        <th *ngIf='currentWeather.uvIndex >= 0 || currentWeather.uvIndex' scope='col'>Indice UV</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td *ngIf='currentWeather.humidity' scope='col'>{{ ((currentWeather.humidity * 100) | number:'1.0-0') + '%'}}</td>
+                        <td *ngIf='currentWeather.windSpeed'>{{ currentWeather.windSpeed + ' m/s' }}</td>
+                        <td *ngIf='currentWeather.pressure'>{{ currentWeather.pressure + ' hPa' }}</td>
+                        <td *ngIf='currentWeather.cloudCover'>{{ ((currentWeather.cloudCover * 100) | number:'1.0-0') + '%' }}</td>
+                        <td *ngIf='currentWeather.precipIntensity'>{{ currentWeather.precipIntensity + ' mm/h' }}</td>
+                        <td *ngIf='currentWeather.visibility'>{{ currentWeather.visibility + ' km'}}</td>
+                        <td *ngIf='currentWeather.uvIndex >= 0 || currentWeather.uvIndex'>{{ currentWeather.uvIndexDescription }} - {{ currentWeather.uvIndex}} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class='container'>
+        <button class="btn btn-secondary" (click)="goBack()"><i class='fa fa-chevron-left'></i> Back</button>
+    </div>
+</div>
