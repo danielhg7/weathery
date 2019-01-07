@@ -8,7 +8,9 @@
 }
 
 .vh8{
-    height: 8vh;
+    height: 3.2rem;
+    position: fixed;
+    width: 100%;
 }
 
 .vh92{
@@ -16,7 +18,7 @@
 }
 
 .inputCity{
-    width: 60vh;
+    width: 25rem;
     border-radius: 18px;
 }
 
@@ -27,4 +29,8 @@
 .pageBarTitle{
     margin-left: 0.3rem;
     margin-right: 1.5rem;
+}
+
+a:hover, img:hover{
+    cursor: pointer;
 }

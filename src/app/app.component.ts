@@ -30,12 +30,20 @@ export class AppComponent{
   getCities(): void{
     this.cityService.getCities(this.city).subscribe(
         cities => {
-        this.cities = cities.predictions;
+          for(var i=0; i<cities.predictions.length; i++){
+            cities.predictions[i].description = cities.predictions[i].description.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+          }
+          this.cities = cities.predictions;
         },
         error => {
         this.errorMessage = <any>error;
         this.toastrService.error(/*this.titleCasePipe.transform(*/this.errorMessage/*)*/);
         }
     )
-}
+  }
+
+  goToHome(): void{
+    this.router.navigate(['home']);
+  }
+
 }

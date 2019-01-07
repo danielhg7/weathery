@@ -1,5 +1,6 @@
 export interface IWeather {
     time: number,
+    timeString: string,
     summary: string,
     icon: string,
     precipIntensity: number,
@@ -13,6 +14,7 @@ export interface IWeather {
     windSpeed: number,
     windGust: number,
     windBearing: number,
+    windBearingDescription: string,
     cloudCover: number,
     uvIndex: number,
     uvIndexDescription: string,

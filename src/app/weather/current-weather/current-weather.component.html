@@ -1,0 +1,59 @@
+<div class='container'>
+    <div *ngIf='timestamp' style='text-align: center'>
+        <div>
+            <h1 class='rem3'>{{ city }}</h1>
+        </div>
+        <div>
+            <h1 class='bold'>
+                <p>{{ weather.temperature | number:'1.0-0' }}<span>°C</span></p>
+            </h1>
+        </div>
+        <div>
+            <h2>
+                <div style="text-align: center;">
+                    <p>
+                        {{ timestamp }} - 
+                        <span style="margin-right: 13px;">{{ weather.summary }}</span>
+                        <span>
+                            <i class='wi wi-day-sunny' *ngIf="weather.icon == 'clear-day'"></i>
+                            <i class='wi wi-night-clear' *ngIf="weather.icon == 'clear-night'"></i>
+                            <i class='wi wi-day-cloudy' *ngIf="weather.icon == 'partly-cloudy-day'"></i>
+                            <i class='wi wi-night-alt-cloudy' *ngIf="weather.icon == 'partly-cloudy-night'"></i>
+                            <i class='wi wi-showers' *ngIf="weather.icon == 'rain'"></i>
+                            <i class='wi wi-cloudy' *ngIf="weather.icon == 'cloudy'"></i>
+                            <i class='wi wi-strong-wind' *ngIf="weather.icon == 'wind'"></i>
+                            <i class='wi wi-fog' *ngIf="weather.icon == 'fog'"></i>
+                        </span>
+                    </p>
+                </div>
+            </h2>
+        </div>
+    </div>
+</div>
+<div class="container results" *ngIf='weather'>
+    <div><h2>Información actual</h2></div>
+    <div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th *ngIf='weather.humidity != undefined' scope='col'>Humedad</th>
+                    <th *ngIf='weather.windSpeed != undefined' scope='col'>Viento</th>
+                    <th *ngIf='weather.cloudCover != undefined' scope='col'>Nubosidad</th>
+                    <th *ngIf='weather.precipIntensity != undefined' scope='col'>Intensidad de precipitación</th>
+                    <th *ngIf='weather.visibility != undefined' scope='col'>Visibilidad</th>
+                    <th *ngIf='weather.uvIndex != undefined' scope='col'>Indice UV</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td *ngIf='weather.humidity != undefined' scope='col'>{{ ((weather.humidity * 100) | number:'1.0-0') + '%'}}</td>
+                    <td *ngIf='weather.windSpeed != undefined'>{{ weather.windBearingDescription + ' ' + ((weather.windSpeed * 3.6) | number:'1.0-0') + ' km/h' }}</td>
+                    <td *ngIf='weather.cloudCover != undefined'>{{ ((weather.cloudCover * 100) | number:'1.0-0') + '%' }}</td>
+                    <td *ngIf='weather.precipIntensity != undefined'>{{ weather.precipIntensity + ' mm/h' }}</td>
+                    <td *ngIf='weather.visibility != undefined'>{{ weather.visibility + ' km'}}</td>
+                    <td *ngIf='weather.uvIndex != undefined'>{{ weather.uvIndexDescription }} - {{ weather.uvIndex}} </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

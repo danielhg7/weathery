@@ -31,7 +31,7 @@ export class CityService {
         let params = new HttpParams().set('address', value).set('key', this.googleApiKey);
 
         return this.http.get<any>(this.googleGeocodeApi, { params: params }).pipe(
-            tap(data => console.log('All: ' + JSON.stringify(data))),
+            tap(data => data),
             catchError(this.handleError)
         );
     }

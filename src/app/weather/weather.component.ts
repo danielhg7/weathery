@@ -1,19 +1,24 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { IWeather } from "./weather";
 import { WeatherService } from "./weather.service";
 import { ToastrService } from "ngx-toastr";
 import { CityService } from "../city/city.service";
 import { Router, Params, ActivatedRoute } from "@angular/router";
+import { IDay } from "./day";
 
  @Component({
      templateUrl: './weather.component.html',
      styleUrls: ['./weather.component.css']
  })
-export class WeatherComponent{
+export class WeatherComponent implements OnInit{
     city: string;
     errorMessage: string;
     weather: any;
     currentWeather: IWeather;
+    hourlyWeather: IWeather[];
+    dailyWeather: IWeather[];
+    hourlySummary: string;
+    dailySummary: string;
     backgroundImage: string = 'src/assets/images/landscape.jpg';
     countryClass: string;
     cities: any[];
@@ -22,6 +27,22 @@ export class WeatherComponent{
     currentLongitude: number = 0.00;
     currentTimestamp: string;
     browserLang: string;
+    day: IDay = {
+        weathers:[],
+        date:'',
+        dayOfWeek:''
+    };
+    daysOfWeek: string[] = [
+        'domingo',
+        'lunes',
+        'martes',
+        'miercoles',
+        'jueves',
+        'viernes',
+        'sabado'
+    ]
+    days: IDay[] = [];
+    currentWeathers: IWeather[];
 
     constructor(private weatherService: WeatherService,
                 private toastrService: ToastrService,
@@ -29,7 +50,7 @@ export class WeatherComponent{
                 private router: Router,
                 private activatedRoute: ActivatedRoute
                 /*private titleCasePipe: TitleCasePipe*/){
-
+        this.currentWeathers = [];
     }
 
     /*getCityWeather(): void{
@@ -89,10 +110,7 @@ export class WeatherComponent{
         this.getBrowserLanguage();
 
         this.activatedRoute.queryParams.subscribe(params => {
-            let city = params.city;
-            console.log(city);
-            this.city = city;
-            this.getLocation(city);
+            this.getLocation(params.city);
         });
     }
 
@@ -100,10 +118,24 @@ export class WeatherComponent{
 
         this.weatherService.getWeatherByLocation(this.currentLatitude, this.currentLongitude, this.browserLang).subscribe(
             weather => {
+                this.day = {
+                    weathers:[],
+                    date:'',
+                    dayOfWeek:''
+                };
+                this.days = [];
+                this.currentWeathers = [];
                 this.weather = weather;
                 this.currentWeather = weather.currently;
+                console.log(JSON.stringify(this.currentWeather));
+                this.hourlyWeather = weather.hourly.data;
+                this.dailyWeather = weather.daily.data;
+                this.hourlySummary = weather.hourly.summary;
+                this.dailySummary = weather.daily.summary;
+                this.convertTimes(this.hourlyWeather, weather.offset);
                 this.validateBackground();
-                this.validateUvIndex();
+                this.validateUvIndex(this.currentWeather);
+                this.validateWindBearing(this.currentWeather);
                 this.buildCurrentTimestamp(weather.offset);
             },
             error => {
@@ -119,41 +151,97 @@ export class WeatherComponent{
 
     buildCurrentTimestamp(offset: number): void{
 
-    var date = new Date();
+        var date = new Date();
 
-    var hours = date.getUTCHours() + offset;
+        var offsetHalf = offset % 1;
 
-    if(hours > 23) {
-        hours = hours - 24;
+        var hours = date.getUTCHours() + (Math.floor(offset));
+
+        if(hours > 23) {
+            hours = hours - 24;
+        }
+
+        else if(hours < 0){
+            hours = hours + 24;
+        }
+
+        var minutes;
+
+        if(offsetHalf > 0){
+            minutes = date.getUTCMinutes() + 30;
+        }
+
+        else{
+            minutes = date.getUTCMinutes();
+        }
+
+        if(minutes > 59){
+            minutes = minutes - 60;
+        }
+
+        minutes = '0' + minutes;
+        
+        if(hours < 10){
+            var formattedTime = "0" + hours + ':' + minutes.substr(-2);
+        }
+
+        else{
+            var formattedTime = hours + ':' + minutes.substr(-2);
+        }
+
+        this.currentTimestamp = formattedTime;
     }
 
-    else if(hours < 0){
-        hours = hours + 24;
-    }
+    buildTimestamp(weather: IWeather, offset: number): void{
 
-    var minutes = "0" + date.getUTCMinutes();
+        var date = new Date(weather.time*1000);
 
-    var seconds = "0" + date.getUTCSeconds();
+        var year = date.getUTCFullYear();
+        var month = date.getUTCMonth() + 1;
+        var day = date.getUTCDate();
 
-    if(hours < 10){
-        var formattedTime = "0" + hours + ':' + minutes.substr(-2);
-    }
+        var hours = date.getUTCHours() + offset;
 
-    else{
-        var formattedTime = hours + ':' + minutes.substr(-2);
-    }
+        if(hours > 23) {
+            hours = hours - 24;
+            day++;
+        }
 
+        else if(hours < 0){
+            hours = hours + 24;
+            day--;
+        }
 
-    this.currentTimestamp = formattedTime;
+        var minutes = "0" + date.getUTCMinutes();
+
+        if(hours < 10){
+            var formattedTime = day + '/' + month + '/' + year + ' ' + '0' + hours + ':' + minutes.substr(-2);
+        }
+
+        else{
+            var formattedTime = day + '/' + month + '/' + year + ' ' + hours + ':' + minutes.substr(-2);
+        }
+
+        weather.timeString = formattedTime;
+        this.currentTimestamp = formattedTime;
     }
 
     getLocation(city: string): void{
         this.cityService.getLocation(city).subscribe(
             location => {
-                this.location = location.results[0];
-                this.currentLatitude = location.results[0].geometry.location.lat;
-                this.currentLongitude = location.results[0].geometry.location.lng;
-                this.getCityWeather();
+                if(location.results.length > 0 && this.isLocality(location.results[0])){
+                    this.city = city;
+                    this.location = location.results[0];
+                    this.currentLatitude = location.results[0].geometry.location.lat;
+                    this.currentLongitude = location.results[0].geometry.location.lng;
+                    this.getCityWeather();
+                }
+
+                else{
+                    this.router.navigate(['/error']);
+                    //this.toastrService.error('Please enter a valid location');
+                }
+                
             },
             error => {
                 this.errorMessage = <any>error;
@@ -167,21 +255,87 @@ export class WeatherComponent{
         console.log(this.browserLang);
     }
 
-    validateUvIndex(): void{
-        if(this.currentWeather.uvIndex <= 2){
-            this.currentWeather.uvIndexDescription = 'Bajo';
+    validateUvIndex(weather: IWeather): void{
+        if(weather.uvIndex <= 2){
+            weather.uvIndexDescription = 'Bajo';
         }
-        else if(this.currentWeather.uvIndex < 6){
-            this.currentWeather.uvIndexDescription = 'Moderado';
+        else if(weather.uvIndex < 6){
+            weather.uvIndexDescription = 'Moderado';
         }
-        else if(this.currentWeather.uvIndex < 8){
-            this.currentWeather.uvIndexDescription = 'Alto';
+        else if(weather.uvIndex < 8){
+            weather.uvIndexDescription = 'Alto';
         }
-        else if(this.currentWeather.uvIndex < 11){
-            this.currentWeather.uvIndexDescription = 'Muy alto';
+        else if(weather.uvIndex < 11){
+            weather.uvIndexDescription = 'Muy alto';
         }
         else{
-            this.currentWeather.uvIndexDescription = 'Extremadamente alto';
+            weather.uvIndexDescription = 'Extremadamente alto';
+        }
+    }
+
+    validateWindBearing(weather: IWeather): void{
+        if(weather.windBearing > 348.75 || weather.windBearing <= 11.25){
+            weather.windBearingDescription = 'N';
+        }
+
+        else if(weather.windBearing > 11.25 && weather.windBearing <= 33.75){
+            weather.windBearingDescription = 'NNE';
+        }
+
+        else if(weather.windBearing > 33.75 && weather.windBearing <= 56.25){
+            weather.windBearingDescription = 'NE';
+        }
+
+        else if(weather.windBearing > 56.25 && weather.windBearing <= 78.75){
+            weather.windBearingDescription = 'ENE';
+        }
+
+        else if(weather.windBearing > 78.75 && weather.windBearing <= 101.25){
+            weather.windBearingDescription = 'E';
+        }
+
+        else if(weather.windBearing > 101.25 && weather.windBearing <= 123.75){
+            weather.windBearingDescription = 'ESE';
+        }
+
+        else if(weather.windBearing > 123.75 && weather.windBearing <= 146.25){
+            weather.windBearingDescription = 'SE';
+        }
+
+        else if(weather.windBearing > 146.25 && weather.windBearing <= 168.75){
+            weather.windBearingDescription = 'SSE';
+        }
+
+        else if(weather.windBearing > 168.75 && weather.windBearing <= 191.25){
+            weather.windBearingDescription = 'S';
+        }
+
+        else if(weather.windBearing > 191.25 && weather.windBearing <= 213.75){
+            weather.windBearingDescription = 'SSO';
+        }
+
+        else if(weather.windBearing > 213.75 && weather.windBearing <= 236.25){
+            weather.windBearingDescription = 'SO';
+        }
+        
+        else if(weather.windBearing > 236.25 && weather.windBearing <= 258.75){
+            weather.windBearingDescription = 'OSO';
+        }
+
+        else if(weather.windBearing > 258.75 && weather.windBearing <= 281.25){
+            weather.windBearingDescription = 'O';
+        }
+
+        else if(weather.windBearing > 281.25 && weather.windBearing <= 303.75){
+            weather.windBearingDescription = 'ONO';
+        }
+        
+        else if(weather.windBearing > 303.75 && weather.windBearing <= 326.25){
+            weather.windBearingDescription = 'NO';
+        }
+
+        else if(weather.windBearing > 326.25 && weather.windBearing <= 348.75){
+            weather.windBearingDescription = 'NNO';
         }
     }
 
@@ -209,6 +363,103 @@ export class WeatherComponent{
         }
         else if(this.currentWeather.icon == 'fog'){
             this.backgroundImage = 'src/assets/images/fog.jpg';
+        }
+    }
+
+    convertTimes(weathers: IWeather[], offset: number): void{
+
+        var firstDate = new Date(weathers[0].time * 1000);
+        var pivotDay = firstDate.getUTCDate();
+        var firstDayOfWeek = firstDate.getUTCDay();
+        var firstDayHours = firstDate.getUTCHours() + offset;
+
+        if(firstDayHours > 23) {
+            firstDayHours-=24;
+            pivotDay++;
+            firstDayOfWeek = (firstDayOfWeek+1)%7;
+        }
+
+        else if(firstDayHours < 0){
+            firstDayHours+=24;
+            pivotDay--;
+            firstDayOfWeek = (firstDayOfWeek-1)%7;
+        }
+
+        for(var i=0; i<weathers.length; i++){
+            
+            this.buildTimestamp(weathers[i], offset);
+            this.validateUvIndex(weathers[i]);
+            this.validateWindBearing(weathers[i]);
+
+            var currentDate = new Date(weathers[i].time * 1000);
+            var currentDay = currentDate.getUTCDate();
+            var currentDayOfWeek = currentDate.getUTCDay();
+            var currentDayHours = currentDate.getUTCHours() + offset;
+
+            if(currentDayHours > 23) {
+                currentDayHours-=24;
+                currentDay++;
+                currentDayOfWeek = (currentDayOfWeek+1)%7;
+            }
+
+            else if(currentDayHours < 0){
+                currentDayHours+=24;
+                currentDay--;
+                currentDayOfWeek = (currentDayOfWeek-1)%7;
+            }
+
+            if(currentDay != pivotDay){
+                this.day.weathers = this.currentWeathers;
+                this.day.date = pivotDay + '/' + (firstDate.getUTCMonth()+1) + '/' + firstDate.getUTCFullYear();
+                this.day.dayOfWeek = this.daysOfWeek[firstDayOfWeek];
+                let copy = Object.assign({}, this.day)
+                this.days.push(copy);
+                this.currentWeathers = [];
+                pivotDay = currentDay;
+                firstDate = currentDate;
+                firstDayOfWeek = currentDayOfWeek;
+                this.currentWeathers.push(weathers[i]);
+            }
+
+            else{
+                this.currentWeathers.push(weathers[i]);
+                if(i == (weathers.length-1)){
+                    this.day.weathers = this.currentWeathers;
+                    this.day.date = pivotDay + '/' + (firstDate.getUTCMonth()+1) + '/' + firstDate.getUTCFullYear();
+                    this.day.dayOfWeek = this.daysOfWeek[firstDayOfWeek];
+                    let copy = Object.assign({}, this.day)
+                    this.days.push(copy);
+                }
+            }
+        }
+    }
+
+    isLocality(location: any): boolean{
+
+        for(var i=0; i < location.types.length; i++){
+            if(location.types[i] == 'locality'){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    ngCollapse(index: number){
+
+        var hourly = document.getElementById('hourlyTable'+index);
+        var arrow = document.getElementById('buttonArrow'+index);
+
+        if(hourly.style.display == 'block'){
+            hourly.style.display = 'none';
+            arrow.className = 'fa fa-angle-down';
+        }
+        
+        else{
+            hourly.style.display = 'block';
+            hourly.style.animation = 'slide-down .9s ease-out';
+            hourly.style.webkitAnimation = 'slide-down 1s ease-out';
+            arrow.className = 'fa fa-angle-up';
         }
     }
 }

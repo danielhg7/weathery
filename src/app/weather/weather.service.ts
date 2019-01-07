@@ -44,7 +44,7 @@ export class WeatherService {
         let finalApiUrl = this.darkSkyApiUrl + this.darkSkyApiKey + '/' + latitude + ',' + longitude;
 
         return this.http.get<any>(finalApiUrl, { headers: headers, params: params }).pipe(
-            tap(data => console.log('All: ' + JSON.stringify(data))),
+            tap(data => data),
             catchError(this.handleError)
         );
     }

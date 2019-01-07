@@ -10,12 +10,16 @@ import { AppComponent } from './app.component';
 import { CommonModule } from '@angular/common';
 import { WelcomeComponent } from './home/welcome.component';
 import { WeatherComponent } from './weather/weather.component';
+import { ErrorComponent } from './error/error.component';
+import { CurrentWeatherComponent } from './weather/current-weather/current-weather.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     WelcomeComponent,
-    WeatherComponent
+    WeatherComponent,
+    ErrorComponent,
+    CurrentWeatherComponent
   ],
   imports: [
     BrowserModule,
@@ -23,6 +27,7 @@ import { WeatherComponent } from './weather/weather.component';
     HttpClientModule,
     RouterModule.forRoot([
       { path: 'weather', component: WeatherComponent },
+      { path: 'error', component: ErrorComponent},
       { path: 'home', component: WelcomeComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: '**', redirectTo: 'home', pathMatch: 'full' }
