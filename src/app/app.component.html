@@ -1,18 +1,18 @@
 <nav class='navbar navbar-expand navbar-light bg-light vh8 nav-back'>
-    <img src='src/assets/icons/weathery.png' class='pageBarLogo' [style.width.px]='imageWidth' (click)='goToHome()'/>
+    <img src='assets/icons/weathery.png' class='pageBarLogo' [style.width.px]='imageWidth' (click)='goToHome()'/>
     <a class='navbar-brand pageBarTitle' (click)='goToHome()'>{{ pageTitle }}</a>
     <ul class='nav nav-pills'>
     </ul>
     <form (ngSubmit)="onSubmit()">
       <input [(ngModel)]='city' name='city' type='text' id='city' class="inputCity form-control form-control-sm" 
-              (keyup)='getCities($event)' placeholder="Type a city" list="cities"/>
+              (keyup)='getCities()' placeholder="Type a city" list="cities"/>
       <datalist id="cities">
           <option *ngFor="let citi of cities" value="{{citi.description}}">{{ citi.description }}</option>
       </datalist>
     </form>
 </nav>
 <div class='vh92'>
-  <router-outlet></router-outlet>
+  <router-outlet (markerDragged)="onMarkDragged($event)"></router-outlet>
 </div>
 
 

@@ -11,6 +11,7 @@ export class CurrentWeatherComponent implements OnInit,OnChanges {
   @Input() weather: IWeather;
   @Input() timestamp: string;
   @Input() city: string;
+  @Input() currentCountryFlag: string;
 
   constructor() { }
 

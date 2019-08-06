@@ -3,3 +3,20 @@
     color: white;
     border-radius: 10px;
 }
+
+.rem2{
+    font-size: 2rem;
+}
+
+.rem1-7{
+    font-size: 1.7rem;
+}
+
+.rem1-2{
+    font-size: 1.2rem;
+}
+
+hr { display: block; height: 1px;
+    border: 0; border-top: 1px solid white;
+    margin: 1em 0; padding: 0; }
+

@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Output, EventEmitter } from "@angular/core";
 import { IWeather } from "./weather";
 import { WeatherService } from "./weather.service";
 import { ToastrService } from "ngx-toastr";
@@ -19,7 +19,7 @@ export class WeatherComponent implements OnInit{
     dailyWeather: IWeather[];
     hourlySummary: string;
     dailySummary: string;
-    backgroundImage: string = 'src/assets/images/landscape.jpg';
+    backgroundImage: string = 'assets/images/landscape.jpg';
     countryClass: string;
     cities: any[];
     location: string;
@@ -43,14 +43,32 @@ export class WeatherComponent implements OnInit{
     ]
     days: IDay[] = [];
     currentWeathers: IWeather[];
+    
+    baseCountryFlag: string = 'https://www.countryflags.io/';
+    flag32: string = "/shiny/32.png";
+    lat: number;
+    lng: number;
+    countryFlag: string;
+
+    showHourly: boolean = true;
+    showDaily: boolean = false;
+
+    hourlyIcon: string;
+    dailyIcon: string;
+
+    @Output() markerDragged: EventEmitter<any> = new EventEmitter<any>();
 
     constructor(private weatherService: WeatherService,
                 private toastrService: ToastrService,
                 private cityService: CityService,
                 private router: Router,
-                private activatedRoute: ActivatedRoute
-                /*private titleCasePipe: TitleCasePipe*/){
+                private activatedRoute: ActivatedRoute){
         this.currentWeathers = [];
+        this.activatedRoute.paramMap.subscribe(
+            params => {
+                console.log("Initializing");
+            }
+        )
     }
 
     /*getCityWeather(): void{
@@ -107,17 +125,96 @@ export class WeatherComponent implements OnInit{
 
     ngOnInit() {
 
+        this.styleMap();
+
         this.getBrowserLanguage();
 
         this.activatedRoute.queryParams.subscribe(params => {
+            this.lat = parseFloat(params.latitude);
+            this.lng = parseFloat(params.longitude);
+            this.countryFlag = this.baseCountryFlag + params.countryFlag + this.flag32;
             this.getLocation(params.city);
         });
+
+    }
+
+    markerClicked(event):void{
+
+        console.log(event);
+    }
+
+    onSubmit(): void{
+        this.router.navigate(['/weather'], { queryParams: { city: this.city, latitude: this.lat, longitude: this.lng, countryFlag: this.countryFlag  }});
+        this.city = '';
+      }
+
+    onDragEnd(event):void{
+        
+        console.log(event.coords.lat + " - " + event.coords.lng);
+
+        this.lat=event.coords.lat;
+        this.lng=event.coords.lng;
+
+        this.cityService.getCityByCoords(event.coords.lat, event.coords.lng).subscribe(
+            city => {
+
+                if(city != null){
+                    this.city = city.formattedAddress;
+                    this.lat = city.latitude;
+                    this.lng = city.longitude;
+                    this.countryFlag = city.countryCode;
+                    this.onSubmit();
+                }
+                
+                else{
+                    this.toastrService.error("Place not found", "Click to dismiss", {extendedTimeOut: 0});
+                }
+            }
+        )
+        //this.markerDragged.emit({ latitude: event.coords.lat, longitude: event.coords.lng});
+    }
+
+    onMapClick(event): void{
+
+
+        this.cityService.getCityByCoords(event.coords.lat, event.coords.lng).subscribe(
+            city => {
+                if(city !== null){
+                    console.log(city.formattedAddress);
+                    this.city = city.formattedAddress;
+                    this.lat = city.latitude;
+                    this.lng = city.longitude;
+                    this.countryFlag = city.countryCode;
+                    this.onSubmit();
+                }
+
+                else{
+                    this.toastrService.error("Place not found", "Click to dismiss", {extendedTimeOut: 0});
+                }
+            }
+        )
+
+        console.log(event);
+    }
+
+    styleMap(): void{
+
+        let element = document.getElementsByClassName("agm-map-container-inner").item(0);
+        element.id = "mapStyler";
+
+        document.getElementById("mapStyler").style.position = "absolute";
+        document.getElementById("mapStyler").style.overflow = "hidden";
+        document.getElementById("mapStyler").style.margin = "7rem 0rem";
+        document.getElementById("mapStyler").style.borderRadius = "10px";
     }
 
     getCityWeather(): void{
 
         this.weatherService.getWeatherByLocation(this.currentLatitude, this.currentLongitude, this.browserLang).subscribe(
             weather => {
+                if(weather.alerts !== null){
+                    console.log("ALERTSSSSS!!!!!!!!!!!!!!");
+                }
                 this.day = {
                     weathers:[],
                     date:'',
@@ -127,11 +224,12 @@ export class WeatherComponent implements OnInit{
                 this.currentWeathers = [];
                 this.weather = weather;
                 this.currentWeather = weather.currently;
-                console.log(JSON.stringify(this.currentWeather));
                 this.hourlyWeather = weather.hourly.data;
                 this.dailyWeather = weather.daily.data;
                 this.hourlySummary = weather.hourly.summary;
+                this.hourlyIcon = weather.hourly.icon;
                 this.dailySummary = weather.daily.summary;
+                this.dailyIcon = weather.daily.icon;
                 this.convertTimes(this.hourlyWeather, weather.offset);
                 this.validateBackground();
                 this.validateUvIndex(this.currentWeather);
@@ -215,11 +313,11 @@ export class WeatherComponent implements OnInit{
         var minutes = "0" + date.getUTCMinutes();
 
         if(hours < 10){
-            var formattedTime = day + '/' + month + '/' + year + ' ' + '0' + hours + ':' + minutes.substr(-2);
+            var formattedTime = '0' + hours + ':' + minutes.substr(-2);
         }
 
         else{
-            var formattedTime = day + '/' + month + '/' + year + ' ' + hours + ':' + minutes.substr(-2);
+            var formattedTime = hours + ':' + minutes.substr(-2);
         }
 
         weather.timeString = formattedTime;
@@ -227,13 +325,19 @@ export class WeatherComponent implements OnInit{
     }
 
     getLocation(city: string): void{
-        this.cityService.getLocation(city).subscribe(
+
+        var parsedCity = encodeURIComponent(city.trim());
+
+        this.cityService.getLocation(parsedCity).subscribe(
             location => {
-                if(location.results.length > 0 && this.isLocality(location.results[0])){
+                if(location != null && location.longitude != null 
+                    && location.latitude != null){
                     this.city = city;
-                    this.location = location.results[0];
-                    this.currentLatitude = location.results[0].geometry.location.lat;
-                    this.currentLongitude = location.results[0].geometry.location.lng;
+                    this.currentLatitude = location.latitude;
+                    this.currentLongitude = location.longitude;
+                    this.lat = this.currentLatitude;
+                    this.lng = this.currentLongitude;
+                    this.countryFlag = this.baseCountryFlag + location.countryCode + this.flag32;
                     this.getCityWeather();
                 }
 
@@ -248,6 +352,43 @@ export class WeatherComponent implements OnInit{
                 this.toastrService.error(/*this.titleCasePipe.transform(*/this.errorMessage/*)*/);
             }
         )
+    }
+
+    clickHourly(event): void{
+
+        var activeLink = document.getElementsByClassName("nav-link active");
+
+        for(var i=0; i < activeLink.length; i++){
+            activeLink.item(i).className = "nav-link";
+        }
+
+        if(event.target.className.indexOf("active") === -1){
+            event.target.className += " active";
+        }
+        
+        if(!this.showHourly){
+            this.showHourly = !this.showHourly;
+            this.showDaily = !this.showDaily;
+        }
+        
+    }
+
+    clickDaily(event): void{
+
+        var activeLink = document.getElementsByClassName("nav-link active");
+
+        for(var i=0; i < activeLink.length; i++){
+            activeLink.item(i).className = "nav-link";
+        }
+
+        if(event.target.className.indexOf("active") === -1){
+            event.target.className += " active";
+        }
+
+        if(!this.showDaily){
+            this.showHourly = !this.showHourly;
+            this.showDaily = !this.showDaily;
+        }
     }
 
     getBrowserLanguage(): void{
@@ -341,28 +482,28 @@ export class WeatherComponent implements OnInit{
 
     validateBackground(): void{
         if(this.currentWeather.icon == 'partly-cloudy-day'){
-            this.backgroundImage = 'src/assets/images/partly-cloudy-day.jpg';
+            this.backgroundImage = 'assets/images/partly-cloudy-day.jpg';
         }
         else if(this.currentWeather.icon == 'partly-cloudy-night'){
-            this.backgroundImage = 'src/assets/images/partly-cloudy-night.jpg';
+            this.backgroundImage = 'assets/images/partly-cloudy-night.jpg';
         }
         else if(this.currentWeather.icon == 'clear-day'){
-            this.backgroundImage = 'src/assets/images/clear-day.jpg';
+            this.backgroundImage = 'assets/images/clear-day.jpg';
         }
         else if(this.currentWeather.icon == 'clear-night'){
-            this.backgroundImage = 'src/assets/images/clear-night.jpg';
+            this.backgroundImage = 'assets/images/clear-night.jpg';
         }
         else if(this.currentWeather.icon == 'rain'){
-            this.backgroundImage = 'src/assets/images/lightRain.jpg';
+            this.backgroundImage = 'assets/images/lightRain.jpg';
         }
         else if(this.currentWeather.icon == 'cloudy'){
-            this.backgroundImage = 'src/assets/images/cloudy.jpg';
+            this.backgroundImage = 'assets/images/cloudy.jpg';
         }
         else if(this.currentWeather.icon == 'wind'){
-            this.backgroundImage = 'src/assets/images/wind.jpg';
+            this.backgroundImage = 'assets/images/wind.jpg';
         }
         else if(this.currentWeather.icon == 'fog'){
-            this.backgroundImage = 'src/assets/images/fog.jpg';
+            this.backgroundImage = 'assets/images/fog.jpg';
         }
     }
 

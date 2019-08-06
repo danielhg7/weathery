@@ -1,14 +1,56 @@
 <div class='bgContainer' 
     [ngStyle]="{'background-image':'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(' + backgroundImage + ')'}">
-    
-    <wt-current-weather [weather]='currentWeather'
-                        [timestamp]='currentTimestamp'
-                        [city]='city'>                
-    </wt-current-weather>
 
-    <div class="container results">
-        <div><h2>Por hora (prox. 48 horas)</h2></div>
-        <div><h6>{{ hourlySummary }}</h6></div>
+    <div class="row">
+
+        <div class="col-md-6">
+            <wt-current-weather [weather]='currentWeather'
+                [timestamp]='currentTimestamp'
+                [city]='city' [currentCountryFlag]='countryFlag'>                
+            </wt-current-weather>
+        </div>
+        <div class="col-md-6">
+            <agm-map [latitude]="lat" [longitude]="lng" (mapClick)="onMapClick($event)">
+                <agm-marker [latitude]="lat" [longitude]="lng" [markerDraggable]="true"
+                            (markerClick)="markerClicked($event)" (dragEnd)="onDragEnd($event)"
+                            animation="DROP">
+                </agm-marker>
+            </agm-map>
+        </div>
+    </div>
+    <div class="row" style="margin-top:5rem;">
+        <div class="col-md-5"></div>
+        <div class="col-md-2">
+            <ul class="nav nav-pills">
+                <li class="nav-item" (click)="clickHourly($event)">
+                    <a class="nav-link active">Hourly</a>
+                </li>
+                <li class="nav-item" (click)="clickDaily($event)">
+                    <a class="nav-link">Daily</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-5"></div>
+    </div>
+    
+    
+
+    <div class="container results" style="margin-bottom: 5rem;" *ngIf="showHourly">
+        <div><h2>Hourly</h2></div>
+        <div class="summary">
+            <span style="font-size: 30px;">
+                <i class='wi wi-day-sunny' *ngIf="hourlyIcon == 'clear-day'"></i>
+                <i class='wi wi-night-clear' *ngIf="hourlyIcon == 'clear-night'"></i>
+                <i class='wi wi-day-cloudy' *ngIf="hourlyIcon == 'partly-cloudy-day'"></i>
+                <i class='wi wi-night-alt-cloudy' *ngIf="hourlyIcon == 'partly-cloudy-night'"></i>
+                <i class='wi wi-showers' *ngIf="hourlyIcon == 'rain'"></i>
+                <i class='wi wi-cloudy' *ngIf="hourlyIcon == 'cloudy'"></i>
+                <i class='wi wi-strong-wind' *ngIf="hourlyIcon == 'wind'"></i>
+                <i class='wi wi-fog' *ngIf="hourlyIcon == 'fog'"></i>
+                <i class='wi wi-snow' *ngIf="hourlyIcon == 'snow'"></i>
+            </span>
+            <span>   {{ hourlySummary }}</span> 
+        </div>
         <div *ngFor='let day of days; let i = index;'>
             <div class="card-header bg-blue" id="headingOne" (click)='ngCollapse(i)'>
                 <div class='row'>
@@ -30,15 +72,14 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th scope='col'>Hora</th>
-                            <th scope='col'>Temperatura</th>
-                            <th scope='col'>Prob. de lluvia</th>
-                            <th scope='col'>Humedad</th>
-                            <th scope='col'>Viento</th>
-                            <th scope='col'>Nubosidad</th>
-                            <th scope='col'>Intensidad de precipitación</th>
-                            <th scope='col'>Visibilidad</th>
-                            <th scope='col'>Indice UV</th>
+                            <th scope='col'>Hour</th>
+                            <th scope='col'>Temp.</th>
+                            <th scope='col'>Precip.</th>
+                            <th scope='col'>Humidity</th>
+                            <th scope='col'>Wind</th>
+                            <th scope='col'>Cloudiness</th>
+                            <th scope='col'>Visibility</th>
+                            <th scope='col'>UV Index</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,7 +90,6 @@
                             <td *ngIf='weather.humidity != undefined'>{{ ((weather.humidity * 100) | number:'1.0-0') + '%'}}</td>
                             <td *ngIf='weather.windSpeed != undefined'>{{ weather.windBearingDescription + ' ' + ((weather.windSpeed * 3.6) | number:'1.0-0') + ' km/h' }}</td>
                             <td *ngIf='weather.cloudCover != undefined'>{{ ((weather.cloudCover * 100) | number:'1.0-0') + '%' }}</td>
-                            <td *ngIf='weather.precipIntensity != undefined'>{{ weather.precipIntensity + ' mm/h' }}</td>
                             <td *ngIf='weather.visibility != undefined'>{{ weather.visibility + ' km'}}</td>
                             <td *ngIf='weather.uvIndex != undefined'>{{ weather.uvIndexDescription }} - {{ weather.uvIndex}} </td>
                         </tr>
@@ -59,36 +99,47 @@
         </div>
     </div>
 
-    <div class="container results" *ngIf='currentWeather'>
-        <div><h2>Diario</h2></div>
-        <div><h6>{{ dailySummary }}</h6></div>
+    <div class="container results" style="margin-bottom: 5rem;" *ngIf='showDaily'>
+        <div><h2>Daily</h2></div>
+        <div class="summary">
+            <span style="font-size: 30px;">
+                <i class='wi wi-day-sunny' *ngIf="dailyIcon == 'clear-day'"></i>
+                <i class='wi wi-night-clear' *ngIf="dailyIcon == 'clear-night'"></i>
+                <i class='wi wi-day-cloudy' *ngIf="dailyIcon == 'partly-cloudy-day'"></i>
+                <i class='wi wi-night-alt-cloudy' *ngIf="dailyIcon == 'partly-cloudy-night'"></i>
+                <i class='wi wi-showers' *ngIf="dailyIcon == 'rain'"></i>
+                <i class='wi wi-cloudy' *ngIf="dailyIcon == 'cloudy'"></i>
+                <i class='wi wi-strong-wind' *ngIf="dailyIcon == 'wind'"></i>
+                <i class='wi wi-fog' *ngIf="dailyIcon == 'fog'"></i>
+                <i class='wi wi-snow' *ngIf="dailyIcon == 'snow'"></i>
+            </span>
+            <span>   {{ dailySummary }}</span>
+        </div>
         <div>
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th *ngIf='currentWeather.humidity' scope='col'>Humedad</th>
-                        <th *ngIf='currentWeather.windSpeed' scope='col'>Viento</th>
-                        <th *ngIf='currentWeather.cloudCover' scope='col'>Nubosidad</th>
-                        <th *ngIf='currentWeather.precipIntensity' scope='col'>Intensidad de precipitación</th>
-                        <th *ngIf='currentWeather.visibility' scope='col'>Visibilidad</th>
-                        <th *ngIf='currentWeather.uvIndex >= 0 || currentWeather.uvIndex' scope='col'>Indice UV</th>
+                        <th scope='col'>Humidity</th>
+                        <th scope='col'>Wind</th>
+                        <th scope='col'>Cloudiness</th>
+                        <th scope='col'>Visibility</th>
+                        <th scope='col'>UV Index</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td *ngIf='currentWeather.humidity' scope='col'>{{ ((currentWeather.humidity * 100) | number:'1.0-0') + '%'}}</td>
-                        <td *ngIf='currentWeather.windSpeed'>{{ currentWeather.windSpeed + ' m/s' }}</td>
-                        <td *ngIf='currentWeather.cloudCover'>{{ ((currentWeather.cloudCover * 100) | number:'1.0-0') + '%' }}</td>
-                        <td *ngIf='currentWeather.precipIntensity'>{{ currentWeather.precipIntensity + ' mm/h' }}</td>
-                        <td *ngIf='currentWeather.visibility'>{{ currentWeather.visibility + ' km'}}</td>
-                        <td *ngIf='currentWeather.uvIndex >= 0 || currentWeather.uvIndex'>{{ currentWeather.uvIndexDescription }} - {{ currentWeather.uvIndex}} </td>
+                    <tr *ngFor='let weather of dailyWeather'>
+                        <td *ngIf='weather.humidity' scope='col'>{{ ((weather.humidity * 100) | number:'1.0-0') + '%'}}</td>
+                        <td *ngIf='weather.windSpeed'>{{ weather.windSpeed + ' m/s' }}</td>
+                        <td *ngIf='weather.cloudCover'>{{ ((weather.cloudCover * 100) | number:'1.0-0') + '%' }}</td>
+                        <td *ngIf='weather.visibility'>{{ weather.visibility + ' km'}}</td>
+                        <td *ngIf='weather.uvIndex >= 0 || weather.uvIndex'>{{ weather.uvIndexDescription }} - {{ currentWeather.uvIndex}} </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class='container'>
-        <button class="btn btn-secondary" (click)="goBack()"><i class='fa fa-chevron-left'></i> Back</button>
+    <div class="row" style="height: 7rem;">
+
     </div>
 </div>

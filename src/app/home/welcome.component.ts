@@ -7,7 +7,7 @@ import { Component } from "@angular/core";
 
 export class WelcomeComponent {
 
-    backgroundImage: string = 'src/assets/images/landscape.jpg';
+    backgroundImage: string = 'assets/images/landscape.jpg';
     pageTitle: string = 'Weathery';
     pageSubtitle: string = 'Weather around the world.';
 }

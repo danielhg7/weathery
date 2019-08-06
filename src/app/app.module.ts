@@ -12,6 +12,8 @@ import { WelcomeComponent } from './home/welcome.component';
 import { WeatherComponent } from './weather/weather.component';
 import { ErrorComponent } from './error/error.component';
 import { CurrentWeatherComponent } from './weather/current-weather/current-weather.component';
+import { AgmCoreModule } from '@agm/core';
+import { FloorPipe } from './util/pipe/decimal-floor.pipe';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,8 @@ import { CurrentWeatherComponent } from './weather/current-weather/current-weath
     WelcomeComponent,
     WeatherComponent,
     ErrorComponent,
-    CurrentWeatherComponent
+    CurrentWeatherComponent,
+    FloorPipe
   ],
   imports: [
     BrowserModule,
@@ -38,7 +41,10 @@ import { CurrentWeatherComponent } from './weather/current-weather/current-weath
       positionClass: 'toast-bottom-right',
       preventDuplicates: true,
     }),
-    CommonModule
+    CommonModule,
+    AgmCoreModule.forRoot({
+      apiKey: 'AIzaSyCmt5tRRBAZVwPZ6PZBzOEflBNg_-2K3s8'
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]

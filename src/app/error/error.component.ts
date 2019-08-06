@@ -10,7 +10,7 @@ export class ErrorComponent implements OnInit{
 
     pageTitle: string;
     pageSubtitle: string;
-    backgroundImage: string = 'src/assets/images/nowhere.jpg';
+    backgroundImage: string = 'assets/images/nowhere.jpg';
 
     constructor(private activatedRoute: ActivatedRoute){
 

@@ -9,18 +9,18 @@ import { tap, catchError } from "rxjs/operators";
 })
 export class CityService {
 
-    //private citiesApiUrl = 'https://andruxnet-world-cities-v1.p.mashape.com';
-    private googleCitiesApi = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-    private googleGeocodeApi = 'https://maps.googleapis.com/maps/api/geocode/json';
-    private googleApiKey = 'AIzaSyDe4NiqieYdjwWF2FdTIrDHIEIKzs4gBbY';
+    private baseUrl = 'http://localhost:8081';
+    private url;
 
     constructor(private http: HttpClient) {}
 
     getCities(value: string): Observable<any> {
+        
+        this.url = this.baseUrl + '/api/cities';
+        
+        let params = new HttpParams().set('input', value);
 
-        let params = new HttpParams().set('input', value).set('types', '(cities)').set('key', this.googleApiKey);
-
-        return this.http.get<any>(this.googleCitiesApi, { params: params }).pipe(
+        return this.http.get<any>(this.url, {params: params }).pipe(
             tap(data => console.log('All: ' + JSON.stringify(data))),
             catchError(this.handleError)
         );
@@ -28,9 +28,23 @@ export class CityService {
 
     getLocation(value: string): Observable<any> {
 
-        let params = new HttpParams().set('address', value).set('key', this.googleApiKey);
+        this.url = this.baseUrl + '/api/location';
 
-        return this.http.get<any>(this.googleGeocodeApi, { params: params }).pipe(
+        let params = new HttpParams().set('address', value);
+
+        return this.http.get<any>(this.url, { params: params }).pipe(
+            tap(data => data),
+            catchError(this.handleError)
+        );
+    }
+
+    getCityByCoords(latitude: any, longitude: any){
+
+        this.url = this.baseUrl + '/api/location/coords';
+
+        let params = new HttpParams().set('latitude', latitude).set('longitude', longitude);
+
+        return this.http.get<any>(this.url, { params: params }).pipe(
             tap(data => data),
             catchError(this.handleError)
         );

@@ -9,41 +9,26 @@ import { ICityWeather } from "./cityWeather";
 })
 export class WeatherService {
 
-    private weatherUrl = 'http://api.openweathermap.org/data/2.5/weather';
-    private darkSkyApiUrl = 'https://api.darksky.net/forecast/';
-    private darkSkyApiKey = 'bc6f44f9698be0d4a04f1689dbf500e3';
+    private baseUrl = 'http://localhost:8081';
+    private url;
 
     constructor(private http: HttpClient) {}
 
-    getCityWeatherByName(city: string): Observable<ICityWeather> {
-
-        let headers = new HttpHeaders();
-        headers.append('Content-Type', 'application/json');
-
-        let params = new HttpParams().set('q', city).set('appid', '25e473e910feaf92d205315541ffe0d8');
-
-        return this.http.get<ICityWeather>(this.weatherUrl, { headers: headers, params: params }).pipe(
-            tap(data => console.log('All: ' + JSON.stringify(data))),
-            catchError(this.handleError)
-        );
-    }
-
     getWeatherByLocation(latitude: number, longitude: number, lang: string): Observable<any> {
 
-        let headers = new HttpHeaders();
-        headers.append('Content-Type', 'application/json');
+        this.url = this.baseUrl + '/api/forecast';
+        var params = new HttpParams().set('latitude', latitude.toString())
+                                    .set('longitude', longitude.toString());
 
         if(lang){
-            var params = new HttpParams().set('lang', lang).set('units', 'si');
+            params = params.set('lang', lang).set('units', 'si');
         }
 
         else{
-            var params = new HttpParams().set('units', 'si');
+            params = params.set('units', 'si');
         }
 
-        let finalApiUrl = this.darkSkyApiUrl + this.darkSkyApiKey + '/' + latitude + ',' + longitude;
-
-        return this.http.get<any>(finalApiUrl, { headers: headers, params: params }).pipe(
+        return this.http.get<any>(this.url, { params: params }).pipe(
             tap(data => data),
             catchError(this.handleError)
         );
