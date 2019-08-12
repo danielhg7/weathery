@@ -14,6 +14,8 @@ import { ErrorComponent } from './error/error.component';
 import { CurrentWeatherComponent } from './weather/current-weather/current-weather.component';
 import { AgmCoreModule } from '@agm/core';
 import { FloorPipe } from './util/pipe/decimal-floor.pipe';
+import { LocationResolver } from './city/location-resolver.service';
+import { WeatherResolver } from './weather/weather-resolver.service';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,7 @@ import { FloorPipe } from './util/pipe/decimal-floor.pipe';
     FormsModule,
     HttpClientModule,
     RouterModule.forRoot([
-      { path: 'weather', component: WeatherComponent },
+      { path: 'weather', component: WeatherComponent, resolve: {location: LocationResolver, weather: WeatherResolver} },
       { path: 'error', component: ErrorComponent},
       { path: 'home', component: WelcomeComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },

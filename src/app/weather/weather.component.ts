@@ -22,7 +22,7 @@ export class WeatherComponent implements OnInit{
     backgroundImage: string = 'assets/images/landscape.jpg';
     countryClass: string;
     cities: any[];
-    location: string;
+    location: any;
     currentLatitude: number = 0.00;
     currentLongitude: number = 0.00;
     currentTimestamp: string;
@@ -63,6 +63,10 @@ export class WeatherComponent implements OnInit{
                 private cityService: CityService,
                 private router: Router,
                 private activatedRoute: ActivatedRoute){
+
+        this.location = this.activatedRoute.snapshot.data['location'];
+        this.weather = this.activatedRoute.snapshot.data['weather'];
+
         this.currentWeathers = [];
         this.activatedRoute.paramMap.subscribe(
             params => {
@@ -134,6 +138,7 @@ export class WeatherComponent implements OnInit{
             this.lng = parseFloat(params.longitude);
             this.countryFlag = this.baseCountryFlag + params.countryFlag + this.flag32;
             this.getLocation(params.city);
+            this.getCityWeather();
         });
 
     }
@@ -159,11 +164,10 @@ export class WeatherComponent implements OnInit{
             city => {
 
                 if(city != null){
-                    this.city = city.formattedAddress;
                     this.lat = city.latitude;
                     this.lng = city.longitude;
-                    this.countryFlag = city.countryCode;
-                    this.onSubmit();
+                    this.countryFlag = this.baseCountryFlag + city.countryCode + this.flag32;
+                    this.getWeatherByLocation(city);
                 }
                 
                 else{
@@ -181,11 +185,8 @@ export class WeatherComponent implements OnInit{
             city => {
                 if(city !== null){
                     console.log(city.formattedAddress);
-                    this.city = city.formattedAddress;
-                    this.lat = city.latitude;
-                    this.lng = city.longitude;
-                    this.countryFlag = city.countryCode;
-                    this.onSubmit();
+                    
+                    this.getWeatherByLocation(city);
                 }
 
                 else{
@@ -210,7 +211,33 @@ export class WeatherComponent implements OnInit{
 
     getCityWeather(): void{
 
-        this.weatherService.getWeatherByLocation(this.currentLatitude, this.currentLongitude, this.browserLang).subscribe(
+        if(this.weather.alerts !== null){
+            console.log("ALERTSSSSS!!!!!!!!!!!!!!");
+        }
+        this.day = {
+            weathers:[],
+            date:'',
+            dayOfWeek:''
+        };
+        this.days = [];
+        this.currentWeathers = [];
+        this.currentWeather = this.weather.currently;
+        this.hourlyWeather = this.weather.hourly.data;
+        this.dailyWeather = this.weather.daily.data;
+        this.hourlySummary = this.weather.hourly.summary;
+        this.hourlyIcon = this.weather.hourly.icon;
+        this.dailySummary = this.weather.daily.summary;
+        this.dailyIcon = this.weather.daily.icon;
+        this.convertTimes(this.hourlyWeather, this.weather.offset);
+        this.validateBackground();
+        this.validateUvIndex(this.currentWeather);
+        this.validateWindBearing(this.currentWeather);
+        this.buildCurrentTimestamp(this.weather.offset);
+    }
+
+    getWeatherByLocation(city: any): void{
+
+        this.weatherService.getWeatherByLocation(this.lat, this.lng, this.browserLang).subscribe(
             weather => {
                 if(weather.alerts !== null){
                     console.log("ALERTSSSSS!!!!!!!!!!!!!!");
@@ -220,6 +247,10 @@ export class WeatherComponent implements OnInit{
                     date:'',
                     dayOfWeek:''
                 };
+                this.city = city.formattedAddress;
+                this.lat = city.latitude;
+                this.lng = city.longitude;
+                this.countryFlag = this.baseCountryFlag + city.countryCode + this.flag32;
                 this.days = [];
                 this.currentWeathers = [];
                 this.weather = weather;
@@ -327,18 +358,17 @@ export class WeatherComponent implements OnInit{
     getLocation(city: string): void{
 
         var parsedCity = encodeURIComponent(city.trim());
-
+        
+        this.city = city;
+        this.countryFlag = this.baseCountryFlag + this.location.countryCode + this.flag32;
+        
         this.cityService.getLocation(parsedCity).subscribe(
             location => {
                 if(location != null && location.longitude != null 
                     && location.latitude != null){
-                    this.city = city;
-                    this.currentLatitude = location.latitude;
-                    this.currentLongitude = location.longitude;
-                    this.lat = this.currentLatitude;
-                    this.lng = this.currentLongitude;
-                    this.countryFlag = this.baseCountryFlag + location.countryCode + this.flag32;
-                    this.getCityWeather();
+                    
+                    this.lat = this.location.latitude;
+                    this.lng = this.location.longitude;
                 }
 
                 else{
