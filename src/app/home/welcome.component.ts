@@ -50,7 +50,8 @@ export class WelcomeComponent implements OnInit{
     }
 
     onSubmit(): void{
-        this.router.navigate(['/weather'], { queryParams: { city: this.city, latitude: this.lat, longitude: this.lng, countryFlag: this.countryFlag }});
+        
+        this.router.navigate(['/weather'], { queryParams: { location: this.city }});
         this.city = '';
     }
 }

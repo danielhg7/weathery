@@ -1,7 +1,7 @@
 <div class='container'>
     <div *ngIf='timestamp' style="margin: 1.5rem 0rem 0rem 7rem;">
         <div>
-            <h1 class='rem2'>{{ city }} <img *ngIf="currentCountryFlag" [src]="currentCountryFlag"></h1>
+            <h1 class='rem2'>{{ city }} <img *ngIf="currentCountryFlag && currentCountryFlag != ''" [src]="currentCountryFlag"></h1>
         </div>
         <div>
             <h1 class='rem2'>
@@ -26,6 +26,7 @@
                             <i class='wi wi-cloudy' *ngIf="weather.icon == 'cloudy'"></i>
                             <i class='wi wi-strong-wind' *ngIf="weather.icon == 'wind'"></i>
                             <i class='wi wi-fog' *ngIf="weather.icon == 'fog'"></i>
+                            <i class='wi wi-snow' *ngIf="weather.icon == 'snow'"></i>
                         </span>
                     </p>
                 </div>

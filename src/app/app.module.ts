@@ -31,7 +31,13 @@ import { WeatherResolver } from './weather/weather-resolver.service';
     FormsModule,
     HttpClientModule,
     RouterModule.forRoot([
-      { path: 'weather', component: WeatherComponent, resolve: {location: LocationResolver, weather: WeatherResolver} },
+      { path: 'weather', 
+        component: WeatherComponent, 
+        resolve: {
+          location: LocationResolver, 
+          weather: WeatherResolver
+        } 
+      },
       { path: 'error', component: ErrorComponent},
       { path: 'home', component: WelcomeComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },

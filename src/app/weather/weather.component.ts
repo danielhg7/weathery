@@ -64,9 +64,6 @@ export class WeatherComponent implements OnInit{
                 private router: Router,
                 private activatedRoute: ActivatedRoute){
 
-        this.location = this.activatedRoute.snapshot.data['location'];
-        this.weather = this.activatedRoute.snapshot.data['weather'];
-
         this.currentWeathers = [];
         this.activatedRoute.paramMap.subscribe(
             params => {
@@ -129,15 +126,24 @@ export class WeatherComponent implements OnInit{
 
     ngOnInit() {
 
+        this.activatedRoute.data.subscribe(
+            data => { 
+                
+                this.location = data['location'];
+                this.weather = data['weather'];
+            }
+
+        );
+    
         this.styleMap();
 
         this.getBrowserLanguage();
 
         this.activatedRoute.queryParams.subscribe(params => {
-            this.lat = parseFloat(params.latitude);
-            this.lng = parseFloat(params.longitude);
-            this.countryFlag = this.baseCountryFlag + params.countryFlag + this.flag32;
-            this.getLocation(params.city);
+            //this.lat = parseFloat(params.latitude);
+            //this.lng = parseFloat(params.longitude);
+            //this.countryFlag = this.baseCountryFlag + params.countryFlag + this.flag32;
+            this.getLocation(params.location);
             this.getCityWeather();
         });
 
@@ -147,11 +153,6 @@ export class WeatherComponent implements OnInit{
 
         console.log(event);
     }
-
-    onSubmit(): void{
-        this.router.navigate(['/weather'], { queryParams: { city: this.city, latitude: this.lat, longitude: this.lng, countryFlag: this.countryFlag  }});
-        this.city = '';
-      }
 
     onDragEnd(event):void{
         
@@ -164,9 +165,6 @@ export class WeatherComponent implements OnInit{
             city => {
 
                 if(city != null){
-                    this.lat = city.latitude;
-                    this.lng = city.longitude;
-                    this.countryFlag = this.baseCountryFlag + city.countryCode + this.flag32;
                     this.getWeatherByLocation(city);
                 }
                 
@@ -180,12 +178,9 @@ export class WeatherComponent implements OnInit{
 
     onMapClick(event): void{
 
-
         this.cityService.getCityByCoords(event.coords.lat, event.coords.lng).subscribe(
             city => {
                 if(city !== null){
-                    console.log(city.formattedAddress);
-                    
                     this.getWeatherByLocation(city);
                 }
 
@@ -237,7 +232,7 @@ export class WeatherComponent implements OnInit{
 
     getWeatherByLocation(city: any): void{
 
-        this.weatherService.getWeatherByLocation(this.lat, this.lng, this.browserLang).subscribe(
+        this.weatherService.getWeatherByLocation(city.latitude, city.longitude, this.browserLang).subscribe(
             weather => {
                 if(weather.alerts !== null){
                     console.log("ALERTSSSSS!!!!!!!!!!!!!!");
@@ -360,15 +355,20 @@ export class WeatherComponent implements OnInit{
         var parsedCity = encodeURIComponent(city.trim());
         
         this.city = city;
-        this.countryFlag = this.baseCountryFlag + this.location.countryCode + this.flag32;
+
+        if(this.location.countryCode)
+        this.countryFlag = '';
+        console.log(parsedCity);
         
         this.cityService.getLocation(parsedCity).subscribe(
             location => {
                 if(location != null && location.longitude != null 
                     && location.latitude != null){
                     
-                    this.lat = this.location.latitude;
-                    this.lng = this.location.longitude;
+                    this.lat = location.latitude;
+                    this.lng = location.longitude;
+                    location.formattedAddress = city;
+                    this.getWeatherByLocation(location);
                 }
 
                 else{

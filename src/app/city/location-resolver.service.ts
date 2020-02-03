@@ -12,6 +12,6 @@ export class LocationResolver implements Resolve<any>{
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot){
 
-        return this.cityService.getLocation(encodeURIComponent(route.queryParamMap.get('city').trim()));
+        return this.cityService.getLocation(encodeURIComponent(route.queryParamMap.get('location').trim()));
     }
 }

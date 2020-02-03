@@ -26,11 +26,23 @@ export class AppComponent implements OnInit{
   }
 
   ngOnInit() {
-    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        
+        position => {
+        
+          this.lat = position.coords.latitude;
+          this.lng = position.coords.longitude;
+      
+      });
+    } else {
+        console.log("Geolocation is not supported by this browser.");
+    }
   }
 
   onSubmit(): void{
-    this.router.navigate(['/weather'], { queryParams: { city: this.city, latitude: this.lat, longitude: this.lng, countryFlag: this.countryFlag }});
+       
+    this.router.navigate(['/weather'], { queryParams: { location: this.city }});
     this.city = '';
   }
 
