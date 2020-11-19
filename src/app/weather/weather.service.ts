@@ -9,7 +9,7 @@ import { ICityWeather } from "./cityWeather";
 })
 export class WeatherService {
 
-    private baseUrl = 'http://localhost:8081';
+    private baseUrl = 'http://localhost:8085';
     private url;
 
     constructor(private http: HttpClient) {}
