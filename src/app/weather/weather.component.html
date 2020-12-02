@@ -1,7 +1,12 @@
-<div class='bgContainer' 
-    [ngStyle]="{'background-image':'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(' + backgroundImage + ')'}">
 
-    <div class="row">
+<div class='bgContainer' 
+    [ngStyle]="{'background-image':'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5))'}">
+
+    <video autoplay muted loop height="110%" width="100%" id="myVideo">
+        <!--<source src="{{routeToVideo}}" type="video/mp4">-->
+    </video>
+
+    <div class="row" style="z-index:10">
 
         <div class="col-md-6">
             <wt-current-weather [weather]='currentWeather'

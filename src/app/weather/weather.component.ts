@@ -19,18 +19,18 @@ export class WeatherComponent implements OnInit{
     dailyWeather: IWeather[];
     hourlySummary: string;
     dailySummary: string;
-    backgroundImage: string = 'assets/images/landscape.jpg';
+    backgroundImage = 'assets/images/landscape.jpg';
     countryClass: string;
     cities: any[];
     location: string;
-    currentLatitude: number = 0.00;
-    currentLongitude: number = 0.00;
+    currentLatitude = 0.00;
+    currentLongitude = 0.00;
     currentTimestamp: string;
     browserLang: string;
     day: IDay = {
-        weathers:[],
-        date:'',
-        dayOfWeek:''
+        weathers: [],
+        date: '',
+        dayOfWeek: ''
     };
     daysOfWeek: string[] = [
         'domingo',
@@ -40,23 +40,24 @@ export class WeatherComponent implements OnInit{
         'jueves',
         'viernes',
         'sabado'
-    ]
+    ];
     days: IDay[] = [];
     currentWeathers: IWeather[];
-    
-    baseCountryFlag: string = 'https://www.countryflags.io/';
-    flag32: string = "/shiny/32.png";
+
+    baseCountryFlag = 'https://www.countryflags.io/';
+    flag32 = '/shiny/32.png';
     lat: number;
     lng: number;
     countryFlag: string;
 
-    showHourly: boolean = true;
-    showDaily: boolean = false;
+    showHourly = true;
+    showDaily = false;
 
     hourlyIcon: string;
     dailyIcon: string;
 
     @Output() markerDragged: EventEmitter<any> = new EventEmitter<any>();
+    routeToVideo: string;
 
     constructor(private weatherService: WeatherService,
                 private toastrService: ToastrService,
@@ -66,9 +67,9 @@ export class WeatherComponent implements OnInit{
         this.currentWeathers = [];
         this.activatedRoute.paramMap.subscribe(
             params => {
-                console.log("Initializing");
+                console.log('Initializing');
             }
-        )
+        );
     }
 
     /*getCityWeather(): void{
@@ -143,17 +144,31 @@ export class WeatherComponent implements OnInit{
         console.log(event);
     }
 
-    onSubmit(): void{
+    playVideo(): void {
+        const video = document.getElementById('myVideo') as HTMLMediaElement;
+        if (video.getElementsByTagName('source').length > 0) {
+            video.removeChild(video.firstChild);
+            video.load();
+        }
+
+        const source = document.createElement('source');
+        source.setAttribute('src', this.routeToVideo);
+        video.appendChild(source);
+        video.muted = true;
+        video.play();
+    }
+
+    onSubmit(): void {
         this.router.navigate(['/weather'], { queryParams: { city: this.city, latitude: this.lat, longitude: this.lng, countryFlag: this.countryFlag  }});
         this.city = '';
       }
 
-    onDragEnd(event):void{
-        
-        console.log(event.coords.lat + " - " + event.coords.lng);
+    onDragEnd(event): void {
 
-        this.lat=event.coords.lat;
-        this.lng=event.coords.lng;
+        console.log(event.coords.lat + ' - ' + event.coords.lng);
+
+        this.lat = event.coords.lat;
+        this.lng = event.coords.lng;
 
         this.cityService.getCityByCoords(event.coords.lat, event.coords.lng).subscribe(
             city => {
@@ -167,11 +182,10 @@ export class WeatherComponent implements OnInit{
                 }
                 
                 else{
-                    this.toastrService.error("Place not found", "Click to dismiss", {extendedTimeOut: 0});
+                    this.toastrService.error('Place not found', 'Click to dismiss', {extendedTimeOut: 0});
                 }
             }
         )
-        //this.markerDragged.emit({ latitude: event.coords.lat, longitude: event.coords.lng});
     }
 
     onMapClick(event): void{
@@ -179,17 +193,15 @@ export class WeatherComponent implements OnInit{
 
         this.cityService.getCityByCoords(event.coords.lat, event.coords.lng).subscribe(
             city => {
-                if(city !== null){
+                if (city !== null) {
                     console.log(city.formattedAddress);
                     this.city = city.formattedAddress;
                     this.lat = city.latitude;
                     this.lng = city.longitude;
                     this.countryFlag = city.countryCode;
                     this.onSubmit();
-                }
-
-                else{
-                    this.toastrService.error("Place not found", "Click to dismiss", {extendedTimeOut: 0});
+                } else {
+                    this.toastrService.error('Place not found', 'Click to dismiss', {extendedTimeOut: 0});
                 }
             }
         )
@@ -197,33 +209,34 @@ export class WeatherComponent implements OnInit{
         console.log(event);
     }
 
-    styleMap(): void{
+    styleMap(): void {
 
-        let element = document.getElementsByClassName("agm-map-container-inner").item(0);
-        element.id = "mapStyler";
+        const element = document.getElementsByClassName('agm-map-container-inner').item(0);
+        element.id = 'mapStyler';
 
-        document.getElementById("mapStyler").style.position = "absolute";
-        document.getElementById("mapStyler").style.overflow = "hidden";
-        document.getElementById("mapStyler").style.margin = "7rem 0rem";
-        document.getElementById("mapStyler").style.borderRadius = "10px";
+        document.getElementById('mapStyler').style.position = 'absolute';
+        document.getElementById('mapStyler').style.overflow = 'hidden';
+        document.getElementById('mapStyler').style.margin = '7rem 0rem';
+        document.getElementById('mapStyler').style.borderRadius = '10px';
     }
 
     getCityWeather(): void{
 
         this.weatherService.getWeatherByLocation(this.currentLatitude, this.currentLongitude, this.browserLang).subscribe(
             weather => {
-                if(weather.alerts !== null){
-                    console.log("ALERTSSSSS!!!!!!!!!!!!!!");
+                if (weather.alerts !== null) {
+                    console.log('ALERTSSSSS!!!!!!!!!!!!!!');
                 }
                 this.day = {
-                    weathers:[],
-                    date:'',
-                    dayOfWeek:''
+                    weathers: [],
+                    date: '',
+                    dayOfWeek: ''
                 };
                 this.days = [];
                 this.currentWeathers = [];
                 this.weather = weather;
                 this.currentWeather = weather.currently;
+                this.routeToVideo = 'assets/videos/' + this.currentWeather.icon + '.mp4';
                 this.hourlyWeather = weather.hourly.data;
                 this.dailyWeather = weather.daily.data;
                 this.hourlySummary = weather.hourly.summary;
@@ -235,6 +248,7 @@ export class WeatherComponent implements OnInit{
                 this.validateUvIndex(this.currentWeather);
                 this.validateWindBearing(this.currentWeather);
                 this.buildCurrentTimestamp(weather.offset);
+                this.playVideo();
             },
             error => {
                 this.errorMessage = <any>error;
@@ -480,29 +494,22 @@ export class WeatherComponent implements OnInit{
         }
     }
 
-    validateBackground(): void{
-        if(this.currentWeather.icon == 'partly-cloudy-day'){
+    validateBackground(): void {
+        if (this.currentWeather.icon === 'partly-cloudy-day'){
             this.backgroundImage = 'assets/images/partly-cloudy-day.jpg';
-        }
-        else if(this.currentWeather.icon == 'partly-cloudy-night'){
+        } else if (this.currentWeather.icon === 'partly-cloudy-night') {
             this.backgroundImage = 'assets/images/partly-cloudy-night.jpg';
-        }
-        else if(this.currentWeather.icon == 'clear-day'){
+        } else if (this.currentWeather.icon === 'clear-day') {
             this.backgroundImage = 'assets/images/clear-day.jpg';
-        }
-        else if(this.currentWeather.icon == 'clear-night'){
+        } else if (this.currentWeather.icon === 'clear-night') {
             this.backgroundImage = 'assets/images/clear-night.jpg';
-        }
-        else if(this.currentWeather.icon == 'rain'){
+        } else if (this.currentWeather.icon === 'rain') {
             this.backgroundImage = 'assets/images/lightRain.jpg';
-        }
-        else if(this.currentWeather.icon == 'cloudy'){
+        } else if (this.currentWeather.icon === 'cloudy') {
             this.backgroundImage = 'assets/images/cloudy.jpg';
-        }
-        else if(this.currentWeather.icon == 'wind'){
+        } else if (this.currentWeather.icon === 'wind') {
             this.backgroundImage = 'assets/images/wind.jpg';
-        }
-        else if(this.currentWeather.icon == 'fog'){
+        } else if (this.currentWeather.icon === 'fog') {
             this.backgroundImage = 'assets/images/fog.jpg';
         }
     }
